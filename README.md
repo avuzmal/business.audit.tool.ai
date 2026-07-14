@@ -21,6 +21,34 @@ The result? Within minutes of submission, a highly personalized, beautifully for
 
 <br />
 
+## 🏛 Architecture Overview
+
+<div align="center">
+
+```mermaid
+graph TD
+    A[🧑‍💼 Prospect] -->|Visits Site| B(💻 Next.js Frontend)
+    B -->|Completes Wizard| C{📝 Form Submission}
+    C -->|JSON Payload| D((⚙️ n8n Webhook))
+    
+    subgraph "n8n Intelligent Automation Pipeline"
+        D -->|Trigger| E[🧠 Claude 3.5 Sonnet]
+        E -->|Writes Strategy| F(📄 Generate Proposal)
+        F -->|Render| G[🖨️ API2PDF]
+        
+        D -->|Record| H[📊 Google Sheets]
+        D -->|Alert| I[💬 Slack]
+    end
+    
+    G -->|Attach PDF| J[✉️ Gmail]
+    J -->|Deliver| K[🎯 Prospect Inbox]
+    I -->|Notify| L[🔥 Sales Team]
+```
+
+</div>
+
+<br />
+
 ## ✨ Features
 
 - **Jaw-Dropping UI/UX**: A highly polished, split-screen desktop layout featuring a sticky mesh-gradient hero section and frosted glass panels.
@@ -47,6 +75,43 @@ The result? Within minutes of submission, a highly personalized, beautifully for
 
 <br />
 
+## ⚙️ The n8n Flywheel Pipeline
+
+The backend of this tool is driven by a massive, custom-built n8n automation flow (`n8n-workflow.json`):
+
+<div align="center">
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as Next.js UI
+    participant N as n8n Webhook
+    participant AI as Claude 3.5
+    participant PDF as API2PDF
+    participant T as Sales Team
+    
+    U->>UI: Submits Business Inefficiencies
+    UI->>N: POST /webhook (Form Data)
+    par Parallel Processing
+        N->>AI: Send data for analysis
+        N->>T: Slack Alert: "New Hot Lead!"
+    end
+    AI-->>N: Returns formatted strategic proposal
+    N->>PDF: Generate professional PDF
+    PDF-->>N: Returns PDF URL
+    N->>U: Email PDF via Gmail
+```
+
+</div>
+
+1. **Webhook Capture**: Instantly catches the form data.
+2. **AI Analysis**: Claude 3.5 Sonnet analyzes the inputs (Industry, Tech Stack, Hours Wasted).
+3. **Proposal Drafting**: Generates a peer-to-peer, highly professional strategic proposal.
+4. **PDF Generation & Delivery**: Converts the proposal into a PDF and emails it directly to the prospect.
+5. **Team Notification**: Alerts the internal team via Slack that a hot lead just came in.
+
+<br />
+
 ## 🚀 Getting Started
 
 To run the jaw-dropping frontend locally:
@@ -65,17 +130,6 @@ npm install
 npm run dev -p 4000
 ```
 Open [http://localhost:4000](http://localhost:4000) with your browser to see the result.
-
-<br />
-
-## ⚙️ The n8n Flywheel Pipeline
-
-The backend of this tool is driven by a massive, custom-built n8n automation flow (`n8n-workflow.json`):
-1. **Webhook Capture**: Instantly catches the form data.
-2. **AI Analysis**: Claude 3.5 Sonnet analyzes the inputs (Industry, Tech Stack, Hours Wasted).
-3. **Proposal Drafting**: Generates a peer-to-peer, highly professional strategic proposal.
-4. **PDF Generation & Delivery**: Converts the proposal into a PDF and emails it directly to the prospect.
-5. **Team Notification**: Alerts the internal team via Slack that a hot lead just came in.
 
 <br />
 
