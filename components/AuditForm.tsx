@@ -91,7 +91,7 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-[var(--color-navy-light)] rounded-2xl shadow-2xl border border-[var(--color-slate-gray)]/30">
+    <div className="w-full">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-3">
           <span className="text-sm font-medium text-[var(--color-slate-gray)]">Step {step} of {totalSteps}</span>
@@ -99,7 +99,7 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
         </div>
         <div className="w-full h-2 bg-[var(--color-navy-deep)] rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-[var(--color-teal)]"
+            className="h-full bg-gradient-to-r from-[var(--color-teal)] to-blue-400 shadow-[0_0_10px_rgba(20,184,166,0.5)]"
             initial={{ width: 0 }}
             animate={{ width: `${(step / totalSteps) * 100}%` }}
             transition={{ duration: 0.3 }}
@@ -122,15 +122,24 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <Label htmlFor="businessName">Business Name</Label>
-                <Input id="businessName" placeholder="e.g. Acme Corp" {...register("businessName")} />
+              <div className="space-y-3">
+                <Label htmlFor="businessName" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Business Name</Label>
+                <Input 
+                  id="businessName" 
+                  placeholder="e.g. Acme Corp" 
+                  className="bg-white/5 border-white/10 focus:ring-2 focus:ring-[var(--color-teal)]/50 text-white placeholder:text-white/30 h-12 text-lg transition-all"
+                  {...register("businessName")} 
+                />
                 {errors.businessName && <p className="text-red-400 text-sm">{errors.businessName.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="industry">Industry</Label>
-                <Select id="industry" {...register("industry")}>
+              <div className="space-y-3">
+                <Label htmlFor="industry" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Industry</Label>
+                <Select 
+                  id="industry" 
+                  className="bg-white/5 border-white/10 focus:ring-2 focus:ring-[var(--color-teal)]/50 text-white h-12 text-lg transition-all"
+                  {...register("industry")}
+                >
                   <option value="">Select an industry</option>
                   {INDUSTRIES.map((ind) => (
                     <option key={ind} value={ind}>{ind}</option>
@@ -139,9 +148,13 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                 {errors.industry && <p className="text-red-400 text-sm">{errors.industry.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="teamSize">Team Size</Label>
-                <Select id="teamSize" {...register("teamSize")}>
+              <div className="space-y-3">
+                <Label htmlFor="teamSize" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Team Size</Label>
+                <Select 
+                  id="teamSize" 
+                  className="bg-white/5 border-white/10 focus:ring-2 focus:ring-[var(--color-teal)]/50 text-white h-12 text-lg transition-all"
+                  {...register("teamSize")}
+                >
                   <option value="">Select team size</option>
                   {TEAM_SIZES.map((size) => (
                     <option key={size} value={size}>{size}</option>
@@ -162,18 +175,19 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <Label htmlFor="mainTasks">Main Repetitive Tasks</Label>
+              <div className="space-y-3">
+                <Label htmlFor="mainTasks" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Main Repetitive Tasks</Label>
                 <Textarea 
                   id="mainTasks" 
                   placeholder="Describe tasks that take up a lot of time (e.g., manual data entry, emailing clients, generating reports...)" 
+                  className="bg-white/5 border-white/10 focus:ring-2 focus:ring-[var(--color-teal)]/50 text-white placeholder:text-white/30 min-h-[120px] text-lg transition-all resize-none"
                   {...register("mainTasks")} 
                 />
                 {errors.mainTasks && <p className="text-red-400 text-sm">{errors.mainTasks.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label>Current Tools Used</Label>
+              <div className="space-y-3">
+                <Label className="text-[var(--color-offwhite)] font-semibold tracking-wide">Current Tools Used</Label>
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   <Controller
                     name="currentTools"
@@ -181,7 +195,12 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                     render={({ field }) => (
                       <>
                         {toolsToShow.map((tool) => (
-                          <label key={tool} className="flex items-center space-x-3 p-3 rounded-md border border-[var(--color-slate-gray)]/50 hover:border-[var(--color-teal)]/50 cursor-pointer transition-colors bg-[var(--color-navy-deep)]/50">
+                          <motion.label 
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            key={tool} 
+                            className="flex items-center space-x-3 p-4 rounded-xl border border-white/10 hover:border-[var(--color-teal)]/50 cursor-pointer transition-colors bg-white/5 backdrop-blur-sm shadow-sm hover:shadow-[0_0_15px_rgba(20,184,166,0.15)]"
+                          >
                             <Checkbox
                               checked={field.value?.includes(tool) || false}
                               onChange={(e) => {
@@ -193,8 +212,8 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                                 );
                               }}
                             />
-                            <span className="text-sm text-[var(--color-offwhite)] font-medium">{tool}</span>
-                          </label>
+                            <span className="text-base text-[var(--color-offwhite)] font-medium">{tool}</span>
+                          </motion.label>
                         ))}
                       </>
                     )}
@@ -203,17 +222,17 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                 {errors.currentTools && <p className="text-red-400 text-sm">{errors.currentTools.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="hoursPerWeek">Estimated Hours Spent on Repetitive Tasks (per week)</Label>
-                <div className="flex items-center space-x-4">
+              <div className="space-y-4 pt-2">
+                <Label htmlFor="hoursPerWeek" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Estimated Hours Spent on Repetitive Tasks (per week)</Label>
+                <div className="flex items-center space-x-6 bg-white/5 p-6 rounded-xl border border-white/10 shadow-inner">
                   <Input 
                     type="range" 
                     min="1" 
                     max="100" 
-                    className="flex-1 accent-[var(--color-teal)] bg-[var(--color-slate-gray)] h-2 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 accent-[var(--color-teal)] bg-white/20 h-2 rounded-lg appearance-none cursor-pointer"
                     {...register("hoursPerWeek", { valueAsNumber: true })} 
                   />
-                  <span className="w-12 text-center font-bold text-lg text-[var(--color-teal)]">{watch("hoursPerWeek")}h</span>
+                  <span className="w-16 text-center font-extrabold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-teal)] to-blue-400 drop-shadow-sm">{watch("hoursPerWeek")}h</span>
                 </div>
                 {errors.hoursPerWeek && <p className="text-red-400 text-sm">{errors.hoursPerWeek.message}</p>}
               </div>
@@ -230,28 +249,30 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <Label htmlFor="painPoint">Biggest Pain Point</Label>
+              <div className="space-y-3">
+                <Label htmlFor="painPoint" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Biggest Pain Point</Label>
                 <Textarea 
                   id="painPoint" 
                   placeholder="What is the #1 bottleneck in your current workflow?" 
+                  className="bg-white/5 border-white/10 focus:ring-2 focus:ring-[var(--color-teal)]/50 text-white placeholder:text-white/30 min-h-[100px] text-lg transition-all resize-none"
                   {...register("painPoint")} 
                 />
                 {errors.painPoint && <p className="text-red-400 text-sm">{errors.painPoint.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Where should we send your report?</Label>
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-[var(--color-offwhite)] font-semibold tracking-wide">Where should we send your report?</Label>
                 <Input 
                   id="email" 
                   type="email" 
                   placeholder="you@company.com" 
+                  className="bg-white/5 border-white/10 focus:ring-2 focus:ring-[var(--color-teal)]/50 text-white placeholder:text-white/30 h-12 text-lg transition-all"
                   {...register("email")} 
                 />
                 {errors.email && <p className="text-red-400 text-sm">{errors.email.message}</p>}
               </div>
 
-              <div className="flex items-start space-x-3 pt-4 border-t border-[var(--color-slate-gray)]/30">
+              <div className="flex items-start space-x-4 pt-6 mt-4 border-t border-white/10">
                 <Controller
                   name="contentOptIn"
                   control={control}
@@ -264,31 +285,37 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                     />
                   )}
                 />
-                <Label htmlFor="contentOptIn" className="text-xs text-[var(--color-slate-gray)] leading-relaxed font-normal cursor-pointer">
-                  🔒 Privacy first: We never share your data. But if we hit a massive ROI for your business, would you be open to us sharing an anonymized version of your audit as a case study?
+                <Label htmlFor="contentOptIn" className="text-sm text-[var(--color-slate-gray)] leading-relaxed font-normal cursor-pointer hover:text-white transition-colors">
+                  <span className="text-[var(--color-teal)] mr-1">🔒 Privacy first:</span> We never share your data. But if we hit a massive ROI for your business, would you be open to us sharing an anonymized version of your audit as a case study?
                 </Label>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="flex justify-between pt-6 mt-8 border-t border-[var(--color-slate-gray)]/30">
+        <div className="flex justify-between pt-8 mt-8 border-t border-white/10">
           {step > 1 ? (
-            <Button type="button" variant="outline" onClick={prevStep}>
-              Back
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button type="button" variant="outline" onClick={prevStep} className="bg-transparent border-white/20 text-white hover:bg-white/10 h-12 px-8 rounded-xl font-semibold tracking-wide transition-all">
+                Back
+              </Button>
+            </motion.div>
           ) : (
             <div></div>
           )}
           
           {step < totalSteps ? (
-            <Button type="button" onClick={nextStep}>
-              Next Step
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button type="button" onClick={nextStep} className="bg-gradient-to-r from-[var(--color-teal)] to-blue-500 hover:from-[var(--color-teal-glow)] hover:to-blue-400 text-[#020617] h-12 px-8 rounded-xl font-bold tracking-wide shadow-[0_0_20px_rgba(20,184,166,0.3)] transition-all border-none">
+                Next Step
+              </Button>
+            </motion.div>
           ) : (
-            <Button type="submit">
-              Get My Free Audit
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button type="submit" className="bg-gradient-to-r from-[var(--color-teal)] to-blue-500 hover:from-[var(--color-teal-glow)] hover:to-blue-400 text-[#020617] h-12 px-8 rounded-xl font-bold tracking-wide shadow-[0_0_20px_rgba(20,184,166,0.4)] transition-all border-none">
+                Get My Free Audit
+              </Button>
+            </motion.div>
           )}
         </div>
       </form>
