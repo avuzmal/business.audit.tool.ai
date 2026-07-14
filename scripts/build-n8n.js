@@ -1,0 +1,309 @@
+const fs = require('fs');
+
+const nodes = [
+  {
+    "id": "1",
+    "name": "Webhook",
+    "type": "n8n-nodes-base.webhook",
+    "typeVersion": 1,
+    "position": [0, 0],
+    "parameters": {
+      "path": "audit-webhook",
+      "httpMethod": "POST",
+      "responseMode": "lastNode",
+      "options": {}
+    }
+  },
+  {
+    "id": "bot_check",
+    "name": "Bot Check (Honeypot)",
+    "type": "n8n-nodes-base.if",
+    "typeVersion": 1,
+    "position": [125, 0],
+    "parameters": {
+      "conditions": {
+        "string": [
+          {
+            "value1": "={{ $json.body.website }}",
+            "operation": "isEmpty"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "2",
+    "name": "Sanitizer",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 1,
+    "position": [250, 0],
+    "parameters": {
+      "jsCode": "const data = $input.first().json.body;\n\n// Strip whitespace from strings\nfor (const key in data) {\n  if (typeof data[key] === 'string') {\n    data[key] = data[key].trim();\n  }\n}\n\n// Ensure numbers and booleans\ndata.hoursPerWeek = Number(data.hoursPerWeek) || 0;\ndata.contentOptIn = Boolean(data.contentOptIn);\n\nreturn { json: data };"
+    }
+  },
+  {
+    "id": "3",
+    "name": "Agent 1",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 3,
+    "position": [500, 0],
+    "parameters": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "authentication": "predefinedCredentialType",
+      "nodeCredentialType": "anthropicApi",
+      "sendHeaders": true,
+      "headerParameters": {
+        "parameters": [
+          { "name": "anthropic-version", "value": "2023-06-01" },
+          { "name": "content-type", "value": "application/json" }
+        ]
+      },
+      "sendBody": true,
+      "bodyParameters": {
+        "parameters": [
+          { "name": "model", "value": "claude-3-5-sonnet-20241022" },
+          { "name": "max_tokens", "value": "1000" },
+          { "name": "temperature", "value": "0.2" },
+          {
+            "name": "messages",
+            "value": "[{\"role\":\"user\",\"content\":\"You must return ONLY valid, parseable JSON. Do not include markdown formatting (no ```json wrappers), no preamble, and no explanations.\\n\\nAnalyze this business data and calculate baseline automation metrics.\\nBusiness Data: {{ $json.businessName }}, Industry: {{ $json.industry }}, Team: {{ $json.teamSize }}, Tools: {{ JSON.stringify($json.currentTools) }}, Tasks: {{ $json.mainTasks }}, Hours/Week: {{ $json.hoursPerWeek }}, Pain Point: {{ $json.painPoint }}.\\n\\nRules:\\n1. Assume a conservative labor cost of $25/hour for all calculations.\\n2. Estimated Annual Labor Cost = (Hours/Week * 52) * 25.\\n3. Automation Readiness Score (1-10): Base it on team size, tool modernity, and task repetitiveness.\\n4. Return ONLY this JSON structure:\\n{\\n  \\\"total_manual_hours_weekly\\\": number,\\n  \\\"estimated_annual_labor_cost\\\": number,\\n  \\\"automation_readiness_score\\\": number,\\n  \\\"readiness_description\\\": \\\"One sentence explaining the score based on their specific tools and tasks.\\\"\\n}\"}]"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "4",
+    "name": "Parse Agent 1",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 1,
+    "position": [750, 0],
+    "parameters": {
+      "jsCode": "let text = $input.first().json.content[0].text;\ntext = text.replace(/^```json\\n?|\\n?```$/g, '').trim();\nreturn { json: JSON.parse(text) };"
+    }
+  },
+  {
+    "id": "5",
+    "name": "Agent 2",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 3,
+    "position": [1000, 0],
+    "parameters": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "authentication": "predefinedCredentialType",
+      "nodeCredentialType": "anthropicApi",
+      "sendHeaders": true,
+      "headerParameters": {
+        "parameters": [
+          { "name": "anthropic-version", "value": "2023-06-01" },
+          { "name": "content-type", "value": "application/json" }
+        ]
+      },
+      "sendBody": true,
+      "bodyParameters": {
+        "parameters": [
+          { "name": "model", "value": "claude-3-5-sonnet-20241022" },
+          { "name": "max_tokens", "value": "2000" },
+          { "name": "temperature", "value": "0.2" },
+          {
+            "name": "messages",
+            "value": "[{\"role\":\"user\",\"content\":\"You must return ONLY valid, parseable JSON. Do not include markdown formatting (no ```json wrappers), no preamble, and no explanations.\\n\\nAct as an elite AI Automation Architect. Based on the business data and analyst metrics, identify the top 3 automation opportunities.\\nBusiness Data: {{ $node['Sanitizer'].json.businessName }}, Industry: {{ $node['Sanitizer'].json.industry }}, Tools: {{ JSON.stringify($node['Sanitizer'].json.currentTools) }}, Tasks: {{ $node['Sanitizer'].json.mainTasks }}, Pain Point: {{ $node['Sanitizer'].json.painPoint }}.\\nAnalyst Metrics: {{ JSON.stringify($json) }}\\n\\nRules:\\n1. Opportunities MUST be specific to their stated industry, tools, and tasks. No generic advice.\\n2. Recommend tools primarily from this stack: n8n, Claude/OpenAI API, Google Sheets, Gmail, Slack.\\n3. Opportunity 1 MUST be the highest-impact, fastest-to-implement \\\"quick win\\\" (under 7 days).\\n4. Calculate hours_saved_weekly realistically (do not promise 100% elimination of complex tasks).\\n5. monthly_roi_estimate = (hours_saved_weekly * 4) * 25.\\n6. Return ONLY this JSON structure:\\n{\\n  \\\"opportunities\\\": [\\n    {\\n      \\\"rank\\\": 1,\\n      \\\"title\\\": \\\"Short, specific title (e.g., AI Lead Scoring Agent)\\\",\\n      \\\"priority\\\": \\\"IMMEDIATE\\\",\\n      \\\"current_process\\\": \\\"2-3 sentences describing their current manual pain based on their input\\\",\\n      \\\"automated_solution\\\": \\\"3-4 sentences detailing the step-by-step n8n/AI workflow\\\",\\n      \\\"tools_recommended\\\": [\\\"n8n\\\", \\\"Claude API\\\", \\\"Gmail\\\"],\\n      \\\"hours_saved_weekly\\\": number,\\n      \\\"monthly_roi_estimate\\\": number,\\n      \\\"implementation_days\\\": number,\\n      \\\"confidence\\\": \\\"HIGH\\\"\\n    }\\n  ]\\n}\"}]"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "6",
+    "name": "Parse Agent 2",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 1,
+    "position": [1250, 0],
+    "parameters": {
+      "jsCode": "let text = $input.first().json.content[0].text;\ntext = text.replace(/^```json\\n?|\\n?```$/g, '').trim();\nreturn { json: JSON.parse(text) };"
+    }
+  },
+  {
+    "id": "7",
+    "name": "Agent 3",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 3,
+    "position": [1500, 0],
+    "parameters": {
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "authentication": "predefinedCredentialType",
+      "nodeCredentialType": "anthropicApi",
+      "sendHeaders": true,
+      "headerParameters": {
+        "parameters": [
+          { "name": "anthropic-version", "value": "2023-06-01" },
+          { "name": "content-type", "value": "application/json" }
+        ]
+      },
+      "sendBody": true,
+      "bodyParameters": {
+        "parameters": [
+          { "name": "model", "value": "claude-3-5-sonnet-20241022" },
+          { "name": "max_tokens", "value": "1000" },
+          { "name": "temperature", "value": "0.2" },
+          {
+            "name": "messages",
+            "value": "[{\"role\":\"user\",\"content\":\"You must return ONLY valid, parseable JSON. Do not include markdown formatting (no ```json wrappers), no preamble, and no explanations.\\n\\nAct as a $2,000/hr Management Consultant. Write the executive-facing copy for this audit report.\\nBusiness: {{ $node['Sanitizer'].json.businessName }}, Industry: {{ $node['Sanitizer'].json.industry }}\\nOpportunity 1: {{ JSON.stringify($json.opportunities[0]) }}\\n\\nRules:\\n1. Executive Summary: 2-3 paragraphs. Professional, empathetic to their pain point, and highlighting the massive potential of Opportunity #1. Mention their business name and industry.\\n2. Next Steps: A 2-3 sentence Call to Action. It must feel like helpful, specific advice, NOT a sales pitch. Reference Opportunity #1's timeline.\\n3. Return ONLY this JSON structure:\\n{\\n  \\\"executive_summary\\\": \\\"string\\\",\\n  \\\"next_steps\\\": \\\"string\\\"\\n}\"}]"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "8",
+    "name": "Parse Agent 3",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 1,
+    "position": [1750, 0],
+    "parameters": {
+      "jsCode": "let text = $input.first().json.content[0].text;\ntext = text.replace(/^```json\\n?|\\n?```$/g, '').trim();\nreturn { json: JSON.parse(text) };"
+    }
+  },
+  {
+    "id": "9",
+    "name": "Merger & HTML Builder",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 1,
+    "position": [2000, 0],
+    "parameters": {
+      "jsCode": "const data = {\n  form: $node['Sanitizer'].json,\n  analyst: $node['Parse Agent 1'].json,\n  strategist: $node['Parse Agent 2'].json,\n  copywriter: $node['Parse Agent 3'].json\n};\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <style>\n    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a2e; margin: 0; padding: 0; line-height: 1.6; }\n    .cover { background: #0a192f; color: white; padding: 60px 40px; }\n    .cover h1 { font-size: 28px; font-weight: 300; letter-spacing: 2px; margin: 0; }\n    .cover h2 { font-size: 18px; font-weight: 500; margin-top: 20px; color: #64ffda; }\n    .cover p { color: rgba(255,255,255,0.7); margin-top: 10px; font-size: 14px; }\n    .section { padding: 30px 40px; border-bottom: 1px solid #eee; }\n    .section-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #0a192f; margin-bottom: 20px; }\n    .score-box { background: #f8f9fa; border-left: 4px solid #64ffda; padding: 20px; margin: 20px 0; }\n    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }\n    .metric { font-size: 14px; }\n    .metric strong { display: block; font-size: 24px; color: #0a192f; margin-bottom: 5px; }\n    .opp-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin: 20px 0; background: #fafbfc; }\n    .opp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }\n    .opp-rank { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #64ffda; background: #0a192f; padding: 4px 8px; border-radius: 4px; }\n    .opp-title { font-size: 18px; font-weight: 600; color: #0a192f; margin: 0; }\n    .opp-details { font-size: 14px; color: #4a5568; }\n    .opp-details h4 { font-size: 12px; text-transform: uppercase; color: #8892b0; margin-top: 15px; margin-bottom: 5px; }\n    .roi-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #0a192f; color: white; border-radius: 8px; overflow: hidden; }\n    .roi-table td { padding: 16px 24px; border-bottom: 1px solid #112240; font-size: 15px; }\n    .roi-table td:last-child { text-align: right; font-weight: 600; color: #64ffda; }\n    .footer { padding: 40px; text-align: center; font-size: 12px; color: #8892b0; background: #f8f9fa; }\n  </style>\n</head>\n<body>\n  <div class=\"cover\">\n    <h1>AI AUTOMATION AUDIT REPORT</h1>\n    <h2>Prepared for: ${data.form.businessName}</h2>\n    <p>Industry: ${data.form.industry} | Team Size: ${data.form.teamSize}</p>\n    <p style=\"margin-top: 30px;\">Prepared by: [Your Name] · AI Automation Specialist</p>\n    <p>${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>\n  </div>\n\n  <div class=\"section\">\n    <div class=\"section-title\">01. Executive Summary</div>\n    <p style=\"font-size: 15px; color: #2d3748;\">${data.copywriter.executive_summary}</p>\n  </div>\n\n  <div class=\"section\">\n    <div class=\"section-title\">02. Current State Analysis</div>\n    <div class=\"score-box\">\n      <div style=\"font-size: 18px; font-weight: 600; margin-bottom: 10px;\">AUTOMATION READINESS: ${data.analyst.automation_readiness_score} / 10</div>\n      <p style=\"font-size: 14px; color: #4a5568; margin: 0;\">${data.analyst.readiness_description}</p>\n      <div class=\"metric-grid\">\n        <div class=\"metric\"><strong>${data.analyst.total_manual_hours_weekly} hrs</strong>Weekly Manual Work</div>\n        <div class=\"metric\"><strong>$${data.analyst.estimated_annual_labor_cost.toLocaleString()}</strong>Est. Annual Labor Cost</div>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"section\">\n    <div class=\"section-title\">03. Top Automation Opportunities</div>\n    ${data.strategist.opportunities.map(opp => `\n      <div class=\"opp-card\">\n        <div class=\"opp-header\">\n          <span class=\"opp-rank\">OPPORTUNITY #${opp.rank} · ${opp.priority}</span>\n        </div>\n        <h3 class=\"opp-title\">${opp.title}</h3>\n        <div class=\"opp-details\">\n          <h4>Current Process</h4>\n          <p>${opp.current_process}</p>\n          <h4>Automated Solution</h4>\n          <p>${opp.automated_solution}</p>\n          <div class=\"metric-grid\" style=\"margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;\">\n            <div class=\"metric\"><strong>${opp.hours_saved_weekly} hrs</strong>Saved Weekly</div>\n            <div class=\"metric\"><strong>$${opp.monthly_roi_estimate.toLocaleString()}</strong>Monthly ROI</div>\n            <div class=\"metric\"><strong>${opp.implementation_days} Days</strong>Implementation</div>\n            <div class=\"metric\"><strong>${opp.confidence}</strong>Confidence</div>\n          </div>\n        </div>\n      </div>\n    `).join('')}\n  </div>\n\n  <div class=\"section\">\n    <div class=\"section-title\">04. Projected ROI Summary</div>\n    <table class=\"roi-table\">\n      <tr><td>Total Hours Saved Weekly</td><td>${data.strategist.opportunities.reduce((acc, curr) => acc + curr.hours_saved_weekly, 0)} hours</td></tr>\n      <tr><td>Total Monthly Savings</td><td>$${data.strategist.opportunities.reduce((acc, curr) => acc + curr.monthly_roi_estimate, 0).toLocaleString()}</td></tr>\n      <tr><td>Estimated Implementation Cost</td><td>$800 – $1,500 (est.)</td></tr>\n      <tr><td>Payback Period</td><td>Within 2 weeks of launch</td></tr>\n    </table>\n  </div>\n  <div class=\"section\">\n    <div class=\"section-title\">05. Next Steps</div>\n    <p style=\"font-size: 15px; color: #2d3748;\">${data.copywriter.next_steps}</p>\n  </div>\n</body>\n</html>`;\n\nreturn { json: { htmlContent: html } };"
+    }
+  },
+  {
+    "id": "10",
+    "name": "API2PDF",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 3,
+    "position": [2250, 0],
+    "parameters": {
+      "method": "POST",
+      "url": "https://v2018.api2pdf.com/chrome/html",
+      "sendHeaders": true,
+      "headerParameters": {
+        "parameters": [
+          { "name": "Authorization", "value": "Bearer YOUR_API2PDF_KEY" },
+          { "name": "content-type", "value": "application/json" }
+        ]
+      },
+      "sendBody": true,
+      "bodyParameters": {
+        "parameters": [
+          { "name": "html", "value": "={{ $json.htmlContent }}" }
+        ]
+      },
+      "options": {
+        "response": {
+          "response": {
+            "responseFormat": "file",
+            "outputPropertyName": "data"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "11",
+    "name": "Gmail",
+    "type": "n8n-nodes-base.gmail",
+    "typeVersion": 2,
+    "position": [2500, 0],
+    "parameters": {
+      "resource": "message",
+      "operation": "send",
+      "subject": "Your AI Automation Audit is ready — {{ $node['Sanitizer'].json.businessName }}",
+      "message": "Hi {{ $node['Sanitizer'].json.businessName.split(' ')[0] }},<br><br>As promised, your custom AI Automation Audit is attached. It includes a breakdown of your top 3 automation opportunities, ROI estimates, and a step-by-step implementation roadmap.<br><br>Review the \"Next Steps\" section on the final page when you're ready to move forward.<br><br>Best,<br>[Your Name]",
+      "sendTo": "={{ $node['Sanitizer'].json.email }}",
+      "appendAttatchments": true,
+      "attachments": "data"
+    }
+  },
+  {
+    "id": "12",
+    "name": "Google Sheets",
+    "type": "n8n-nodes-base.googleSheets",
+    "typeVersion": 3,
+    "position": [2750, -100],
+    "parameters": {
+      "operation": "append",
+      "documentId": { "value": "YOUR_SHEET_ID" },
+      "sheetName": { "value": "Sheet1" },
+      "columns": {
+        "mappingMode": "defineBelow",
+        "valueMode": "expression",
+        "values": {
+          "Timestamp": "={{ $now }}",
+          "Business Name": "={{ $node['Sanitizer'].json.businessName }}",
+          "Industry": "={{ $node['Sanitizer'].json.industry }}",
+          "Team Size": "={{ $node['Sanitizer'].json.teamSize }}",
+          "Email": "={{ $node['Sanitizer'].json.email }}",
+          "Pain Point": "={{ $node['Sanitizer'].json.painPoint }}",
+          "Hours/Week": "={{ $node['Sanitizer'].json.hoursPerWeek }}",
+          "Opp 1 Title": "={{ $node['Parse Agent 2'].json.opportunities[0].title }}",
+          "Total Monthly ROI": "={{ $node['Parse Agent 2'].json.opportunities.reduce((a,c)=>a+c.monthly_roi_estimate,0) }}",
+          "Content Opt-In": "={{ $node['Sanitizer'].json.contentOptIn ? 'Yes' : 'No' }}",
+          "Status": "New"
+        }
+      }
+    }
+  },
+  {
+    "id": "13",
+    "name": "Slack",
+    "type": "n8n-nodes-base.slack",
+    "typeVersion": 2,
+    "position": [2750, 100],
+    "parameters": {
+      "resource": "message",
+      "operation": "post",
+      "channel": "YOUR_CHANNEL_ID",
+      "text": "🚀 *New Audit Lead!* \nBusiness: {{ $node['Sanitizer'].json.businessName }} \nIndustry: {{ $node['Sanitizer'].json.industry }} \nEst. Monthly ROI: ${{ $node['Parse Agent 2'].json.opportunities.reduce((a,c)=>a+c.monthly_roi_estimate,0) }} \nEmail: {{ $node['Sanitizer'].json.email }}"
+    }
+  },
+  {
+    "id": "14",
+    "name": "Webhook Response",
+    "type": "n8n-nodes-base.webhookResponse",
+    "typeVersion": 1,
+    "position": [3000, 0],
+    "parameters": {
+      "responseMode": "onReceived",
+      "responseCode": 200,
+      "responseHeaders": { "entries": [{ "name": "Content-Type", "value": "application/json" }] },
+      "responseBody": "{\n  \"success\": true,\n  \"message\": \"Report generated\"\n}"
+    }
+  }
+];
+
+const connections = {
+  "Webhook": { "main": [[{ "node": "Bot Check (Honeypot)", "type": "main", "index": 0 }]] },
+  "Bot Check (Honeypot)": { "main": [[{ "node": "Sanitizer", "type": "main", "index": 0 }], []] },
+  "Sanitizer": { "main": [[{ "node": "Agent 1", "type": "main", "index": 0 }]] },
+  "Agent 1": { "main": [[{ "node": "Parse Agent 1", "type": "main", "index": 0 }]] },
+  "Parse Agent 1": { "main": [[{ "node": "Agent 2", "type": "main", "index": 0 }]] },
+  "Agent 2": { "main": [[{ "node": "Parse Agent 2", "type": "main", "index": 0 }]] },
+  "Parse Agent 2": { "main": [[{ "node": "Agent 3", "type": "main", "index": 0 }]] },
+  "Agent 3": { "main": [[{ "node": "Parse Agent 3", "type": "main", "index": 0 }]] },
+  "Parse Agent 3": { "main": [[{ "node": "Merger & HTML Builder", "type": "main", "index": 0 }]] },
+  "Merger & HTML Builder": { "main": [[{ "node": "API2PDF", "type": "main", "index": 0 }]] },
+  "API2PDF": { "main": [[{ "node": "Gmail", "type": "main", "index": 0 }]] },
+  "Gmail": { "main": [[{ "node": "Google Sheets", "type": "main", "index": 0 }, { "node": "Slack", "type": "main", "index": 0 }, { "node": "Webhook Response", "type": "main", "index": 0 }]] }
+};
+
+const n8nWorkflow = {
+  name: "AI Business Audit Tool Backend",
+  nodes: nodes,
+  connections: connections,
+  active: false,
+  settings: {}
+};
+
+fs.writeFileSync('C:/Users/laptopzone/.gemini/antigravity/scratch/business.audit.tool.ai/n8n-workflow.json', JSON.stringify(n8nWorkflow, null, 2));
+console.log('n8n-workflow.json successfully generated.');
