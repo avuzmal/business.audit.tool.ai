@@ -280,7 +280,7 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                     <Checkbox
                       id="contentOptIn"
                       checked={field.value || false}
-                      onCheckedChange={(checked) => field.onChange(checked)}
+                      onChange={(e) => field.onChange(e.target.checked)}
                       className="mt-1"
                     />
                   )}
