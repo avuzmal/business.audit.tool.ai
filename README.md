@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="https://raw.githubusercontent.com/avuzmal/business.audit.tool.ai/master/public/globe.svg" width="120" height="120" alt="Logo" />
+  
+  # Business Audit Tool AI
+  
+  **A Premium, Automated Lead-Generation & Auditing Engine for B2B SaaS**
+  
+  [![Next.js](https://img.shields.io/badge/Built_with-Next.js_14-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+  [![Tailwind CSS](https://img.shields.io/badge/Styled_with-Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
+  [![Framer Motion](https://img.shields.io/badge/Animated_by-Framer_Motion-blue?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
+  [![n8n](https://img.shields.io/badge/Powered_by-n8n_Automation-FF6600?style=for-the-badge&logo=n8n)](https://n8n.io)
+</div>
 
-## Getting Started
+<br />
 
-First, run the development server:
+## 🚀 The Vision
+
+The **Business Audit Tool AI** is not just a form—it is a deeply engineered, fully automated sales associate. Built with a pristine **split-screen glassmorphism UI**, the frontend captures detailed business inefficiencies and streams them directly into an advanced **n8n AI agent pipeline**.
+
+The result? Within minutes of submission, a highly personalized, beautifully formatted business audit proposal is generated via Claude 3.5 Sonnet, converted to a professional PDF, and delivered directly to the prospect's inbox—all while notifying your internal sales team on Slack.
+
+<br />
+
+## ✨ Features
+
+- **Jaw-Dropping UI/UX**: A highly polished, split-screen desktop layout featuring a sticky mesh-gradient hero section and frosted glass panels.
+- **Interactive Selection Cards**: Replacing boring dropdowns with massive, tactile cards featuring `lucide-react` iconography and glowing hover states.
+- **True Native Animations**: Wizard steps slide in and out with perfect physics, powered by Framer Motion.
+- **Fully Integrated AI Backend**: Webhook integration with n8n triggers an automated data enrichment and proposal generation pipeline.
+- **Zero Jargon**: Engineered to speak peer-to-peer with business owners, translating their inputs into actionable, high-level strategic proposals.
+
+<br />
+
+## 🛠 Tech Stack
+
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS + Shadcn UI
+- **Animations**: Framer Motion
+- **State Management & Validation**: React Hook Form + Zod
+- **Icons**: Lucide React
+
+### Automation Backend (n8n)
+- **AI Brain**: Anthropic Claude 3.5 Sonnet
+- **Document Generation**: API2PDF
+- **CRM / Delivery**: Google Sheets, Gmail, Slack
+
+<br />
+
+## 🚀 Getting Started
+
+To run the jaw-dropping frontend locally:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Clone the repository
+git clone https://github.com/avuzmal/business.audit.tool.ai.git
+
+# 2. Navigate into the directory
+cd business.audit.tool.ai
+
+# 3. Install dependencies
+npm install
+
+# 4. Start the local development server
+npm run dev -p 4000
 ```
+Open [http://localhost:4000](http://localhost:4000) with your browser to see the result.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<br />
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚙️ The n8n Flywheel Pipeline
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The backend of this tool is driven by a massive, custom-built n8n automation flow (`n8n-workflow.json`):
+1. **Webhook Capture**: Instantly catches the form data.
+2. **AI Analysis**: Claude 3.5 Sonnet analyzes the inputs (Industry, Tech Stack, Hours Wasted).
+3. **Proposal Drafting**: Generates a peer-to-peer, highly professional strategic proposal.
+4. **PDF Generation & Delivery**: Converts the proposal into a PDF and emails it directly to the prospect.
+5. **Team Notification**: Alerts the internal team via Slack that a hot lead just came in.
 
-## Learn More
+<br />
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<div align="center">
+  <i>Engineered for unparalleled conversion rates.</i>
+</div>
