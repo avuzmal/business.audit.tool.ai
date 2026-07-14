@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/avuzmal/business.audit.tool.ai/master/public/globe.svg" width="120" height="120" alt="Logo" />
+  <img src="https://img.icons8.com/fluency/96/000000/audit.png" width="120" height="120" alt="Logo" />
   
   # Business Audit Tool AI
   
@@ -9,15 +9,17 @@
   [![Tailwind CSS](https://img.shields.io/badge/Styled_with-Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
   [![Framer Motion](https://img.shields.io/badge/Animated_by-Framer_Motion-blue?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
   [![n8n](https://img.shields.io/badge/Powered_by-n8n_Automation-FF6600?style=for-the-badge&logo=n8n)](https://n8n.io)
+
+  ![UI Screenshot](./assets/ui-screenshot.png) <!-- TODO: Replace with actual running UI GIF -->
 </div>
 
 <br />
 
-## 🚀 The Vision
+## 🎯 The Vision
 
 The **Business Audit Tool AI** is not just a form—it is a deeply engineered, fully automated sales associate. Built with a pristine **split-screen glassmorphism UI**, the frontend captures detailed business inefficiencies and streams them directly into an advanced **n8n AI agent pipeline**.
 
-The result? Within minutes of submission, a highly personalized, beautifully formatted business audit proposal is generated via Claude 3.5 Sonnet, converted to a professional PDF, and delivered directly to the prospect's inbox—all while notifying your internal sales team on Slack.
+The result? Within minutes of submission, a highly personalized, beautifully formatted business audit proposal is generated via the latest Anthropic Claude model, converted to a professional PDF, and delivered directly to the prospect's inbox—all while notifying your internal sales team on Slack.
 
 <br />
 
