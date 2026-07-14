@@ -9,6 +9,8 @@ export const auditSchema = z.object({
   hoursPerWeek: z.number().min(1).max(100, "Enter a number between 1 and 100"),
   painPoint: z.string().min(10, "Please describe your biggest pain point"),
   email: z.string().email("Invalid email address"),
+  website: z.string().optional(),
+  contentOptIn: z.boolean().optional(),
 });
 
 export type AuditFormData = z.infer<typeof auditSchema>;

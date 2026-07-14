@@ -18,6 +18,26 @@
       }
     },
     {
+      "id": "bot_check",
+      "name": "Bot Check (Honeypot)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        125,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.website }}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "2",
       "name": "Sanitizer",
       "type": "n8n-nodes-base.code",
@@ -27,7 +47,7 @@
         0
       ],
       "parameters": {
-        "jsCode": "const data = $input.first().json.body;\n\n// Strip whitespace from strings\nfor (const key in data) {\n  if (typeof data[key] === 'string') {\n    data[key] = data[key].trim();\n  }\n}\n\n// Ensure hoursPerWeek is a number\ndata.hoursPerWeek = Number(data.hoursPerWeek) || 0;\n\nreturn { json: data };"
+        "jsCode": "const data = $input.first().json.body;\n\n// Strip whitespace from strings\nfor (const key in data) {\n  if (typeof data[key] === 'string') {\n    data[key] = data[key].trim();\n  }\n}\n\n// Ensure numbers and booleans\ndata.hoursPerWeek = Number(data.hoursPerWeek) || 0;\ndata.contentOptIn = Boolean(data.contentOptIn);\n\nreturn { json: data };"
       }
     },
     {
@@ -325,6 +345,7 @@
             "Hours/Week": "={{ $node['Sanitizer'].json.hoursPerWeek }}",
             "Opp 1 Title": "={{ $node['Parse Agent 2'].json.opportunities[0].title }}",
             "Total Monthly ROI": "={{ $node['Parse Agent 2'].json.opportunities.reduce((a,c)=>a+c.monthly_roi_estimate,0) }}",
+            "Content Opt-In": "={{ $node['Sanitizer'].json.contentOptIn ? 'Yes' : 'No' }}",
             "Status": "New"
           }
         }
@@ -375,11 +396,23 @@
       "main": [
         [
           {
-            "node": "Sanitizer",
+            "node": "Bot Check (Honeypot)",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Bot Check (Honeypot)": {
+      "main": [
+        [
+          {
+            "node": "Sanitizer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     },
     "Sanitizer": {

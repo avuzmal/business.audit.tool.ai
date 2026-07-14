@@ -108,6 +108,9 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
       </div>
 
       <form onSubmit={handleSubmit(processForm)} className="space-y-6">
+        {/* Anti-spam honeypot */}
+        <input type="text" className="hidden" tabIndex={-1} autoComplete="off" {...register("website")} />
+
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
@@ -246,6 +249,24 @@ export function AuditForm({ onSubmitStart, onSubmitSuccess, onSubmitError }: Aud
                   {...register("email")} 
                 />
                 {errors.email && <p className="text-red-400 text-sm">{errors.email.message}</p>}
+              </div>
+
+              <div className="flex items-start space-x-3 pt-4 border-t border-[var(--color-slate-gray)]/30">
+                <Controller
+                  name="contentOptIn"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="contentOptIn"
+                      checked={field.value || false}
+                      onCheckedChange={(checked) => field.onChange(checked)}
+                      className="mt-1"
+                    />
+                  )}
+                />
+                <Label htmlFor="contentOptIn" className="text-xs text-[var(--color-slate-gray)] leading-relaxed font-normal cursor-pointer">
+                  🔒 Privacy first: We never share your data. But if we hit a massive ROI for your business, would you be open to us sharing an anonymized version of your audit as a case study?
+                </Label>
               </div>
             </motion.div>
           )}
