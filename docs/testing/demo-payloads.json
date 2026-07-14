@@ -1,0 +1,32 @@
+[
+  {
+    "businessName": "Apex E-Commerce Group",
+    "industry": "E-commerce",
+    "teamSize": "6-15",
+    "mainTasks": "Downloading orders from Shopify, formatting them in Google Sheets, and manually emailing the warehouse for fulfillment. Copy-pasting tracking numbers back into Shopify.",
+    "currentTools": ["Shopify", "Google Sheets", "Gmail"],
+    "hoursPerWeek": 18,
+    "painPoint": "Order fulfillment delays and human error in tracking numbers causing customer complaints.",
+    "email": "test-ecommerce@example.com"
+  },
+  {
+    "businessName": "Elevate Marketing Agency",
+    "industry": "Marketing Agency",
+    "teamSize": "1-5",
+    "mainTasks": "Pulling data from Google Analytics and HubSpot to create weekly client reports in Canva. Chasing clients on Slack for asset approvals.",
+    "currentTools": ["HubSpot", "Google Analytics", "Canva", "Slack"],
+    "hoursPerWeek": 12,
+    "painPoint": "Reporting takes up the entire Friday, preventing us from actually working on campaign strategy.",
+    "email": "test-agency@example.com"
+  },
+  {
+    "businessName": "Summit Financial Consulting",
+    "industry": "Consulting",
+    "teamSize": "16-50",
+    "mainTasks": "Extracting data from QuickBooks to reconcile accounts in Excel. Manually scheduling follow-up meetings via Gmail back-and-forth.",
+    "currentTools": ["QuickBooks", "Gmail", "Zoom"],
+    "hoursPerWeek": 25,
+    "painPoint": "We spend too much time scheduling and doing manual data entry instead of advising clients.",
+    "email": "test-consulting@example.com"
+  }
+]
