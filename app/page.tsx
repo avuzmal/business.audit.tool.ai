@@ -57,7 +57,7 @@ export default function Home() {
             </h1>
             
             <p className="text-xl md:text-2xl text-slate-400 font-light leading-relaxed">
-              Get a custom AI Automation Audit in 60 seconds. We'll analyze your exact workflow and calculate your true ROI potential.
+              Get a custom AI Automation Audit in 60 seconds. We&apos;ll analyze your exact workflow and calculate your true ROI potential.
             </p>
 
             <div className="hidden lg:flex items-center space-x-4 pt-8 text-slate-500">
